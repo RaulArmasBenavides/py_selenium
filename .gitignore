@@ -127,7 +127,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
+#se agrega la maquina virtual que creamos
+pyselenium/ 
 # Spyder project settings
 .spyderproject
 .spyproject
