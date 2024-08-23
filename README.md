@@ -114,7 +114,12 @@ Primero activar el entorno virtual ( tiene que aparecer (env) en la terminal)
  pytest tests\test_add_owner_pet.py
  pytest tests\test_add_owner.py     
  
- Para probar la version de angular , primero levantar el angular (ng serve -o) y el backend (el servicio tiene que estar corriendo en docker)
+ Para probar la version de angular , primero levantar el angular y el backend (el servicio tiene que estar corriendo en docker)
+
+ Descargar la version de angular aqui : https://github.com/spring-petclinic/spring-petclinic-angular
+ Luego ejecutar npm install 
+ Luego ejecutar ng serve -o
+
  pytest tests\test_add_owner2.py  
  pytest tests\test_add_owner_pet2.py   
 
