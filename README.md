@@ -94,3 +94,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 Enjoy automated testing with **Selenium** and **Pytest**! 🚀🖥️
+
+
+
+
+
+
+
+
+
+
+
+
+Correr : 
+Primero activar el entorno virtual ( tiene que aparecer (env) en la terminal)
+.\env\Scripts\activate 
+
+ Luego correr los siguientes comandos 
+ pytest tests\test_add_owner_pet.py
+ pytest tests\test_add_owner.py     
+ 
+ Para probar la version de angular , primero levantar el angular (ng serve -o) y el backend (el servicio tiene que estar corriendo en docker)
+ pytest tests\test_add_owner2.py  
+ pytest tests\test_add_owner_pet2.py   
+
