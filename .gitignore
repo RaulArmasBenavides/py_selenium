@@ -121,6 +121,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.local
 .venv
 env/
 venv/
@@ -128,7 +129,15 @@ ENV/
 env.bak/
 venv.bak/
 #se agrega la maquina virtual que creamos
-pyselenium/ 
+pyselenium/
+
+# Screenshots and test artifacts
+*.png
+*.jpg
+*.jpeg
+test_results/
+reports/
+htmlcov/
 # Spyder project settings
 .spyderproject
 .spyproject

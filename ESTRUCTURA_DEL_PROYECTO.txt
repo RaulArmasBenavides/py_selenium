@@ -1,0 +1,255 @@
+================================================================================
+ESTRUCTURA PROFESIONAL DEL PROYECTO - Page Object Model (POM)
+================================================================================
+
+py_selenium/
+│
+├── 📋 CONFIGURACIÓN
+│   ├── .env                          ← Variables de entorno (URLs, credenciales)
+│   ├── config.py                     ← Lee desde .env, centraliza configuración
+│   ├── pytest.ini                    ← Configuración de pytest
+│   ├── conftest.py                   ← Fixtures globales
+│   ├── requirements.txt              ← Dependencias Python
+│   ├── .gitignore                    ← Qué archivos ignorar
+│
+├── 📚 DOCUMENTACIÓN
+│   ├── README.md                     ← Documentación original
+│   ├── README_NUEVA_ESTRUCTURA.md   ← Guía de estructura profesional
+│   ├── RUN_TESTS.md                  ← Cómo ejecutar tests
+│   ├── CLAUDE.md                     ← Documentación técnica
+│   └── ESTRUCTURA_DEL_PROYECTO.txt   ← Este archivo
+│
+├── 🎯 CÓDIGO COMPARTIDO (Reutilizable)
+│   ├── pages/
+│   │   ├── __init__.py
+│   │   ├── base_page.py              ← Clase base con métodos comunes
+│   │   │                                (click, fill, get_text, take_screenshot, etc.)
+│   │   └── sidebar_page.py           ← Componentes compartidas (navegación sidebar)
+│   │
+│   └── shared/
+│       ├── __init__.py
+│       ├── logger.py                 ← Logging centralizado
+│       └── helpers.py                ← Funciones auxiliares reutilizables
+│
+├── 📱 STRACON APP (Aplicación Principal)
+│   ├── conftest.py                   ← Fixtures específicas de STRACON
+│   ├── pages/
+│   │   ├── __init__.py
+│   │   └── sidebar_page.py           ← Navegación específica de STRACON
+│   │
+│   └── modules/                      ← Cada módulo = una carpeta
+│       │
+│       ├── asignacion_formatos/      ← Módulo 1: Asignación de Formatos
+│       │   ├── __init__.py
+│       │   ├── pages.py              ← Page Objects para este módulo
+│       │   │                           (locators + métodos de interacción)
+│       │   └── test_asignacion_formatos.py  ← Tests limpios y legibles
+│       │
+│       ├── reportes/                 ← Módulo 2: Reportes
+│       │   ├── __init__.py
+│       │   ├── pages.py
+│       │   └── test_reportes.py
+│       │
+│       ├── tareos/                   ← Módulo 3: Tareos
+│       │   ├── __init__.py
+│       │   ├── pages.py
+│       │   └── test_tareos.py
+│       │
+│       ├── dashboard/                ← Módulo N: Dashboard
+│       │   ├── __init__.py
+│       │   ├── pages.py
+│       │   └── test_dashboard.py
+│       │
+│       ├── gestion_equipos/
+│       ├── partes_diarios/
+│       └── ...
+│
+└── 📖 EXAMPLES (Referencia - Tests Antiguos)
+    ├── __init__.py
+    ├── petclinic_cloud.py            ← Ejemplo antiguo (Spring Petclinic Cloud)
+    └── petclinic_angular.py          ← Ejemplo antiguo (Angular)
+
+================================================================================
+FLUJO DE EJECUCIÓN DE UN TEST
+================================================================================
+
+1. Usuario ejecuta:
+   $ pytest stracon/modules/asignacion_formatos/test_asignacion_formatos.py -v
+
+2. Pytest carga conftest.py:
+   ✓ Fixture global (conftest.py raíz)
+   ✓ Fixture de STRACON (stracon/conftest.py)
+
+3. Test se ejecuta:
+   ✓ Crea instancia de AsignacionFormatosPage
+   ✓ AsignacionFormatosPage hereda de BasePage
+   ✓ BasePage usa config.py para timeouts y Chrome options
+
+4. Test interactúa con página:
+   ✓ self.page.asignar_formato() → llama a métodos en pages.py
+   ✓ pages.py usa métodos heredados de BasePage (click, fill, etc.)
+   ✓ BasePage maneja waits automáticamente
+   ✓ shared/logger.py registra acciones
+
+5. Test verifica resultados:
+   ✓ assert self.page.verificar_asignacion()
+   ✓ Captura screenshot en caso de fallo
+
+6. Driver se limpia:
+   ✓ Fixture teardown cierra browser
+
+================================================================================
+CÓMO AGREGAR UN NUEVO MÓDULO
+================================================================================
+
+1️⃣  Crear carpeta:
+    mkdir stracon/modules/nuevo_modulo
+
+2️⃣  Crear pages.py (Page Objects):
+    stracon/modules/nuevo_modulo/pages.py
+
+    from pages.base_page import BasePage
+
+    class NuevoModuloPage(BasePage):
+        LOCATOR_1 = (By.ID, "elemento_1")
+
+        def mi_accion(self):
+            self.click(self.LOCATOR_1)
+
+3️⃣  Crear test file:
+    stracon/modules/nuevo_modulo/test_nuevo_modulo.py
+
+    class TestNuevoModulo:
+        def test_algo(self, stracon_driver):
+            page = NuevoModuloPage(stracon_driver)
+            page.mi_accion()
+
+4️⃣  Ejecutar:
+    $ pytest stracon/modules/nuevo_modulo/ -v
+
+================================================================================
+DIFERENCIA: Antes vs Después
+================================================================================
+
+❌ ANTES (Sin POM):
+├── test_add_owner.py          # Selectores aquí
+├── test_add_owner2.py         # DUPLICADO
+├── test_add_owner_pet.py      # DUPLICADO
+└── selenium_testcase.py       # Mezcla todo
+
+Problemas:
+- Mucho código duplicado
+- Si cambia HTML, cambiar todos los tests
+- No escalable
+- Difícil de mantener
+
+✅ DESPUÉS (Con POM):
+├── pages/base_page.py         # Métodos comunes (una sola fuente)
+├── stracon/modules/asignacion_formatos/
+│   ├── pages.py               # Selectores AQUÍ (un solo lugar)
+│   └── test_asignacion_formatos.py  # Tests limpios
+└── stracon/modules/reportes/
+    ├── pages.py               # Selectores para este módulo
+    └── test_reportes.py       # Tests limpios
+
+Ventajas:
+- Código reutilizable (basepage.py)
+- Un solo lugar para cambiar selectores
+- Muy escalable (agregar módulos es trivial)
+- Fácil de mantener
+- Profesional (estándar en empresas)
+
+================================================================================
+MAPEO: Módulos Sidebar ↔ Carpetas Tests
+================================================================================
+
+Sidebar STRACON                    →   Carpeta Tests
+─────────────────────────────────────────────────────────
+Configuraciones                    →   stracon/modules/configuraciones/
+Asistencia Digital                 →   stracon/modules/asistencia_digital/
+Tareos                             →   stracon/modules/tareos/
+Gestión de Equipos                 →   stracon/modules/gestion_equipos/
+Checklist Pre-Uso                  →   stracon/modules/checklist/
+Partes Diarios                      →   stracon/modules/partes_diarios/
+Asignación de Formatos ✓ (exist)   →   stracon/modules/asignacion_formatos/
+Reportes ✓ (exist)                 →   stracon/modules/reportes/
+Geocercas y Vinculaciones          →   stracon/modules/geocercas/
+Demoras                             →   stracon/modules/demoras/
+Dashboard                           →   stracon/modules/dashboard/
+Pendientes a Aprobar               →   stracon/modules/pendientes/
+Master HM                           →   stracon/modules/master_hm/
+
+================================================================================
+COMANDOS RÁPIDOS
+================================================================================
+
+Activar entorno:
+  .\env\Scripts\activate
+
+Instalar dependencias:
+  pip install -r requirements.txt
+
+Ejecutar todos los tests:
+  pytest stracon/ -v
+
+Ejecutar un módulo:
+  pytest stracon/modules/asignacion_formatos/ -v
+
+Ejecutar un test específico:
+  pytest stracon/modules/asignacion_formatos/test_asignacion_formatos.py::TestAsignacionFormatos::test_asignar_formato_exitoso
+
+Con reportes:
+  pytest stracon/ --html=report.html
+
+Ejecutar en paralelo:
+  pytest stracon/ -n auto
+
+Ver logs:
+  pytest stracon/ -v -s
+
+Parar en primer fallo:
+  pytest stracon/ -x
+
+================================================================================
+ARCHIVO IMPORTANTE: .env
+================================================================================
+
+STRACON_BASE_URL=https://refactor-straqui.stracon.com
+STRACON_USERNAME=user@example.com
+STRACON_PASSWORD=password123
+
+EXPLICIT_WAIT=20              # segundos para waits
+IMPLICIT_WAIT=10              # segundos implícitos
+CHROME_HEADLESS=False         # True para correr sin interfaz gráfica
+LOG_LEVEL=INFO                # DEBUG, INFO, WARNING, ERROR
+
+================================================================================
+REFERENCIA: Métodos Base (base_page.py)
+================================================================================
+
+self.click(locator)               # Click con wait automático
+self.fill(locator, text)          # Fill con clear automático
+self.get_text(locator)            # Get text con wait
+self.is_element_visible(locator)  # Verifica visibilidad
+self.is_text_present(text)        # Busca texto en página
+self.take_screenshot(filename)    # Captura pantalla
+self.scroll_to_element(locator)   # Desplaza a elemento
+self.wait_for_url_to_contain()    # Espera cambio de URL
+self.get_current_url()            # URL actual
+
+================================================================================
+ESTRUCTURA = PROFESIONALISMO ✨
+================================================================================
+
+Las empresas grandes (Google, Amazon, Meta, Netflix) usan POM porque:
+
+✅ Reutilizable        - Código DRY (Don't Repeat Yourself)
+✅ Mantenible          - Cambios en UI = una carpeta
+✅ Escalable           - Agregar tests es crecer, no complicarse
+✅ Legible             - Tests son documentación
+✅ Testeable           - Cada módulo independiente
+✅ Profesional         - Estándar industria
+
+Esta estructura es tu base para crecer a cientos de tests sin dolor.
+
+================================================================================

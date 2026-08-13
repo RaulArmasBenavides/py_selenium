@@ -1,0 +1,243 @@
+py_selenium/                                  ← Raíz del proyecto
+│
+├─ 📄 CONFIGURACIÓN Y DOCUMENTACIÓN
+│  ├─ .env                                    ← Variables de entorno (NO commitear)
+│  ├─ config.py                               ← Lee .env, centraliza config
+│  ├─ conftest.py                             ← Fixtures globales
+│  ├─ pytest.ini                              ← Config de pytest
+│  ├─ requirements.txt                        ← Dependencias
+│  └─ .gitignore                              ← Qué ignorar en git
+│
+├─ 📚 DOCUMENTACIÓN
+│  ├─ README.md                               ← Documentación original
+│  ├─ README_NUEVA_ESTRUCTURA.md              ← Nueva arquitectura profesional
+│  ├─ RUN_TESTS.md                            ← Cómo ejecutar tests
+│  ├─ CLAUDE.md                               ← Documentación técnica (para Claude)
+│  ├─ CHECKLIST_NUEVO_TEST.md                 ← Guía para crear tests nuevos
+│  ├─ ESTRUCTURA_DEL_PROYECTO.txt             ← Explicación de estructura
+│  └─ ARBOL_COMPLETO.txt                      ← Este archivo
+│
+├─ 🔧 CÓDIGO COMPARTIDO (Reutilizable entre apps)
+│  │
+│  ├─ pages/                                  ← Page Objects base
+│  │  ├─ __init__.py
+│  │  ├─ base_page.py                         ← 🌟 Clase base con métodos comunes
+│  │  │                                          (click, fill, get_text, take_screenshot,
+│  │  │                                           wait_for_loading, scroll_to_element, etc.)
+│  │  └─ sidebar_page.py                      ← Navegación compartida
+│  │
+│  └─ shared/                                 ← Utilidades compartidas
+│     ├─ __init__.py
+│     ├─ logger.py                            ← Logging centralizado
+│     └─ helpers.py                           ← Funciones auxiliares
+│
+├─ 📱 STRACON (Aplicación Principal)
+│  │
+│  ├─ conftest.py                             ← Fixtures específicas de STRACON
+│  │
+│  ├─ pages/                                  ← Page Objects de STRACON
+│  │  ├─ __init__.py
+│  │  └─ sidebar_page.py                      ← Navegación del sidebar de STRACON
+│  │
+│  └─ modules/                                ← Módulos = Funcionalidades
+│     │
+│     ├─ asignacion_formatos/                 ✓ Módulo 1: ASIGNACIÓN DE FORMATOS
+│     │  ├─ __init__.py
+│     │  ├─ pages.py                          ← Locators + métodos (AsignacionFormatosPage)
+│     │  └─ test_asignacion_formatos.py       ← Tests: test_asignar_formato_exitoso, etc.
+│     │
+│     ├─ reportes/                            ✓ Módulo 2: REPORTES
+│     │  ├─ __init__.py
+│     │  ├─ pages.py                          ← Locators + métodos (ReportesPage)
+│     │  └─ test_reportes.py                  ← Tests para reportes
+│     │
+│     ├─ tareos/                              ⭕ Módulo 3: TAREOS (Vacío, listo para tests)
+│     │  ├─ __init__.py
+│     │  ├─ pages.py
+│     │  └─ test_tareos.py
+│     │
+│     ├─ gestion_equipos/                     ⭕ Módulo 4: GESTIÓN DE EQUIPOS
+│     │  ├─ __init__.py
+│     │  ├─ pages.py
+│     │  └─ test_gestion_equipos.py
+│     │
+│     ├─ partes_diarios/                      ⭕ Módulo 5: PARTES DIARIOS
+│     ├─ configuraciones/                     ⭕ Módulo 6: CONFIGURACIONES
+│     ├─ asistencia_digital/                  ⭕ Módulo 7: ASISTENCIA DIGITAL
+│     ├─ checklist/                           ⭕ Módulo 8: CHECKLIST PRE-USO
+│     ├─ dashboard/                           ⭕ Módulo 9: DASHBOARD
+│     ├─ geocercas/                           ⭕ Módulo 10: GEOCERCAS Y VINCULACIONES
+│     └─ demoras/                             ⭕ Módulo 11: DEMORAS
+│
+├─ 📖 EXAMPLES (Referencia/Ejemplos - Tests Antiguos)
+│  │
+│  ├─ __init__.py
+│  ├─ petclinic_cloud.py                      ← Ejemplo: Spring Petclinic Cloud
+│  └─ petclinic_angular.py                    ← Ejemplo: Angular (comentado)
+│
+├─ 🖼️ Archivos Generados (No commitear)
+│  ├─ *.png                                   ← Screenshots de tests
+│  ├─ report.html                             ← Reporte HTML de pytest
+│  └─ .pytest_cache/                          ← Cache de pytest
+│
+└─ 📦 Virtual Environment (No commitear)
+   └─ env/                                    ← Entorno Python aislado
+
+
+================================================================================
+RESUMEN VISUAL: CÓMO SE RELACIONAN LOS ARCHIVOS
+================================================================================
+
+pytest
+  │
+  └─> conftest.py (global)
+        │
+        └─> stracon/conftest.py (específico)
+              │
+              ├─> config.py (lee .env)
+              ├─> pages/base_page.py (métodos base)
+              ├─> shared/logger.py (logging)
+              │
+              └─> stracon/modules/asignacion_formatos/
+                    ├─> pages.py (hereda de BasePage)
+                    └─> test_asignacion_formatos.py
+                          │
+                          └─> Assertions, Screenshots, Logs
+
+
+================================================================================
+FLUJO DE UN TEST DE PRINCIPIO A FIN
+================================================================================
+
+1️⃣  Usuario ejecuta:
+    $ pytest stracon/modules/asignacion_formatos/test_asignacion_formatos.py::TestAsignacionFormatos::test_asignar_formato_exitoso
+
+2️⃣  Pytest carga:
+    ✓ conftest.py (raíz) → driver global
+    ✓ stracon/conftest.py → driver de STRACON
+    ✓ config.py → settings desde .env
+
+3️⃣  Test setup (@pytest.fixture):
+    ✓ Crea AsignacionFormatosPage
+    ✓ AsignacionFormatosPage hereda de BasePage
+    ✓ Navega a módulo usando SidebarPage
+
+4️⃣  Test ejecuta:
+    ✓ self.page.asignar_formato("Formato A", "Juan")
+      → pages.py llama click() y fill()
+      → BasePage maneja waits automáticos
+      → shared/logger.py registra acciones
+
+5️⃣  Test verifica:
+    ✓ assert self.page.verificar_asignacion()
+    ✓ BasePage.is_text_present() busca texto
+
+6️⃣  Teardown:
+    ✓ Screenshot en fallo
+    ✓ Limpia cookies
+    ✓ Driver quit
+
+
+================================================================================
+ATAJOS PARA NAVEGAR
+================================================================================
+
+¿Quieres...?
+
+✅ Ejecutar todos los tests
+   $ pytest stracon/
+
+✅ Ejecutar un módulo específico
+   $ pytest stracon/modules/asignacion_formatos/ -v
+
+✅ Ejecutar un test específico
+   $ pytest stracon/modules/asignacion_formatos/test_asignacion_formatos.py::TestAsignacionFormatos::test_asignar_formato_exitoso
+
+✅ Ejecutar con reportes HTML
+   $ pytest stracon/ --html=report.html
+
+✅ Ejecutar en paralelo (rápido)
+   $ pytest stracon/ -n auto
+
+✅ Ver logs y prints
+   $ pytest stracon/ -v -s
+
+✅ Parar en primer fallo
+   $ pytest stracon/ -x
+
+✅ Crear nuevo test
+   → Lee CHECKLIST_NUEVO_TEST.md
+
+✅ Entender estructura
+   → Lee ESTRUCTURA_DEL_PROYECTO.txt
+
+✅ Ejecutar comandos
+   → Lee RUN_TESTS.md
+
+
+================================================================================
+LÍMPIEZA Y MANTENIMIENTO
+================================================================================
+
+Archivos a IGNORAR en git (.gitignore):
+✗ .env (credenciales)
+✗ env/ (entorno virtual)
+✗ *.png (screenshots)
+✗ report.html (reportes)
+✗ .pytest_cache/
+✗ __pycache__/
+
+Archivos a COMMITEAR:
+✓ config.py
+✓ conftest.py
+✓ pytest.ini
+✓ pages/ (base_page.py, sidebar_page.py)
+✓ shared/ (logger.py, helpers.py)
+✓ stracon/modules/ (pages.py y test_*.py)
+✓ requirements.txt
+✓ Documentación (.md, .txt)
+
+
+================================================================================
+PRÓXIMOS PASOS
+================================================================================
+
+1. Completar módulos vacíos:
+   - tareos/
+   - gestion_equipos/
+   - partes_diarios/
+   - etc.
+
+2. Agregar más tests:
+   - Crear tests/scenarios para cada funcionalidad
+   - Usar parametrize para casos múltiples
+   - Agregar edge cases
+
+3. Mejorar Page Objects:
+   - Agregar más métodos reutilizables
+   - Mejorar locators si fallan
+
+4. CI/CD:
+   - Integrar con GitHub Actions / Jenkins
+   - Ejecutar tests automáticamente
+
+5. Reportes:
+   - Generar reportes HTML
+   - Enviar reportes por email
+   - Dashboard de resultados
+
+
+================================================================================
+ESTRUCTURA = ÉXITO ✨
+
+Esta arquitectura profesional con Page Object Model es:
+
+✅ ESCALABLE    - Agregar 100 tests es igual de fácil que 10
+✅ MANTENIBLE   - Cambios en UI = cambiar solo 1 archivo
+✅ REUTILIZABLE - Código base compartido entre todos los tests
+✅ LEGIBLE      - Tests son documentación
+✅ PROFESIONAL  - Usado en Google, Amazon, Meta, etc.
+
+Bienvenido a la forma correcta de hacer testing. 🚀
+
+================================================================================
